@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historico - Nosso App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 1.3rem; font-weight: 800; color: #333; }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .vale {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 2px dashed #e67e22;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .vale.usado {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+        .vale.pendente-parceiro {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: #2196F3;
+        }
+        .vale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .vale-title {
+            font-weight: 700;
+            color: #d35400;
+            font-size: 1.2rem;
+        }
+        .vale.pendente-parceiro .vale-title {
+            color: #1565C0;
+        }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .vale-foto {
+            width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .vale-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-success:hover { transform: translateY(-2px); }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 15px; }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .flash-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+            <div class="header-title">📜 Historico</div>
+            <div></div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="{{ url_for('pagina_historico_conclusoes') }}" class="tab">Conclusoes</a>
+            <a href="{{ url_for('pagina_historico_resgates') }}" class="tab active">Resgates</a>
+        </div>
+        
+        <!-- Meus Vales -->
+        <div class="card">
+            <div class="card-title">🎫 Meus Vales ({{ meus_vales|length }})</div>
+            
+            {% if meus_vales %}
+                {% for vale in meus_vales %}
+                <div class="vale {{ 'usado' if vale.utilizado }}">
+                    <div class="vale-header">
+                        <span class="vale-title">{{ vale.recompensa.titulo }}</span>
+                        {% if not vale.utilizado %}
+                            <span class="badge badge-info">Valido</span>
+                        {% else %}
+                            <span class="badge badge-success">Usado</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if vale.recompensa.foto %}
+                    <img src="{{ url_for('uploaded_file', filename=vale.recompensa.foto) }}" class="vale-foto" alt="{{ vale.recompensa.titulo }}">
+                    {% endif %}
+                    
+                    <div class="vale-meta">
+                        Resgatado em {{ vale.data_resgate.strftime('%d/%m/%Y') }} por {{ vale.custo }} pts
+                    </div>
+                    
+                    {% if not vale.utilizado %}
+                    <a href="{{ url_for('usar_vale', id=vale.id) }}" class="btn btn-success">
+                        ✓ Marcar como usado
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>Voce ainda nao resgatou nenhum vale.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Vales do Parceiro (Pendentes) -->
+        {% if parceiro %}
+        <div class="card">
+            <div class="card-title">💝 Vales de {{ parceiro.nome }} ({{ vales_parceiro|length }} pendentes)</div>
+            
+            {% if vales_parceiro %}
+                {% for vale in vales_parceiro %}
+                <div class="vale pendente-parceiro">
+                    <div class="vale-header">
+                        <span class="vale-title">{{ vale.recompensa.titulo }}</span>
+                        <span class="badge badge-warning">Pendente</span>
+                    </div>
+                    
+                    {% if vale.recompensa.foto %}
+                    <img src="{{ url_for('uploaded_file', filename=vale.recompensa.foto) }}" class="vale-foto" alt="{{ vale.recompensa.titulo }}">
+                    {% endif %}
+                    
+                    <div class="vale-meta">
+                        {{ parceiro.nome }} resgatou em {{ vale.data_resgate.strftime('%d/%m/%Y') }}
+                    </div>
+                    
+                    {% if vale.recompensa.descricao %}
+                    <p style="font-style: italic; color: #555; margin-top: 8px;">"{{ vale.recompensa.descricao }}"</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">✨</div>
+                    <p>{{ parceiro.nome }} nao tem vales pendentes.</p>
+                    <p style="font-size: 0.9rem;">Voce esta livre! 😄</p>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recompensas - Nosso App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 1.3rem; font-weight: 800; color: #333; }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 0.9rem; }
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus { outline: none; border-color: #667eea; }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: #666;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 8px 15px;
+            width: auto;
+            font-size: 0.85rem;
+        }
+        .item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .item.pendente { border-left: 4px solid #FF9800; }
+        .item.aprovada { border-left: 4px solid #4CAF50; background: #e8f5e9; }
+        .item.rejeitada { border-left: 4px solid #f44336; background: #ffebee; opacity: 0.8; }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .item-title { font-weight: 700; color: #333; font-size: 1rem; }
+        .item-points {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .item-desc { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+        .item-meta { font-size: 0.85rem; color: #888; }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 15px; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+            <div class="header-title">💡 Recompensas</div>
+            <div></div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Sugerir nova recompensa -->
+        <div class="card">
+            <div class="card-title">O que você quer receber?</div>
+            <div class="info-box">
+                💡 Sugira uma recompensa. Seu parceiro(a) define o custo em pontos!
+            </div>
+            <form action="{{ url_for('sugerir_recompensa') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Nome da recompensa</label>
+                    <input type="text" name="titulo" placeholder="Ex: Massagem de 30min" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição (opcional)</label>
+                    <textarea name="descricao" rows="2" placeholder="Detalhes..."></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" name="foto" id="foto-rec" accept="image/*">
+                        <label for="foto-rec" class="file-input-label">
+                            🎁 Adicionar foto ilustrativa (opcional)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Custo sugerido (pontos)</label>
+                    <input type="number" name="custo_sugerido" value="50" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sugerir Recompensa</button>
+            </form>
+        </div>
+        
+        <!-- Minhas recompensas aprovadas -->
+        <div class="card">
+            <div class="card-title">✅ Aprovadas ({{ minhas_aprovadas|length }})</div>
+            
+            {% if minhas_aprovadas %}
+                {% for rec in minhas_aprovadas %}
+                <div class="item aprovada">
+                    <div class="item-header">
+                        <span class="item-title">{{ rec.titulo }}</span>
+                        <span class="item-points">{{ rec.custo }} pts</span>
+                    </div>
+                    {% if rec.descricao %}
+                    <div class="item-desc">{{ rec.descricao }}</div>
+                    {% endif %}
+                    <div class="item-meta">
+                        <span>Aprovada por {{ rec.aprovado_por.nome }}</span>
+                        <a href="{{ url_for('excluir_recompensa', id=rec.id) }}" class="btn btn-danger" 
+                           onclick="return confirm('Remover?')">Remover</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>Nenhuma recompensa aprovada ainda.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Minhas recompensas pendentes -->
+        <div class="card">
+            <div class="card-title">⏳ Aguardando Aprovação ({{ minhas_pendentes|length }})</div>
+            
+            {% if minhas_pendentes %}
+                {% for rec in minhas_pendentes %}
+                <div class="item pendente">
+                    <div class="item-header">
+                        <span class="item-title">{{ rec.titulo }}</span>
+                        <span class="badge badge-warning">Pendente</span>
+                    </div>
+                    {% if rec.descricao %}
+                    <div class="item-desc">{{ rec.descricao }}</div>
+                    {% endif %}
+                    <div class="item-meta">
+                        <span>Custo sugerido: {{ rec.custo_sugerido }} pts</span>
+                        <a href="{{ url_for('excluir_recompensa', id=rec.id) }}" class="btn btn-danger" 
+                           onclick="return confirm('Cancelar?')">Cancelar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📨</div>
+                    <p>Nenhuma sugestão pendente.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Rejeitadas -->
+        {% if minhas_rejeitadas %}
+        <div class="card">
+            <div class="card-title">❌ Rejeitadas</div>
+            {% for rec in minhas_rejeitadas %}
+            <div class="item rejeitada">
+                <div class="item-header">
+                    <span class="item-title">{{ rec.titulo }}</span>
+                    <span class="badge badge-danger">Rejeitada</span>
+                </div>
+                <div class="item-meta">
+                    <a href="{{ url_for('excluir_recompensa', id=rec.id) }}" class="btn btn-danger">Remover</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

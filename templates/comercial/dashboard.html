@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nosso App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 1.3rem; font-weight: 800; color: #333; }
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .saldo-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .welcome-msg {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .casal-info {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .casal-code {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #d35400;
+            letter-spacing: 3px;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .menu-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 15px;
+            border-radius: 15px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .menu-item:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .menu-item-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .menu-item-title { font-weight: 700; font-size: 1rem; }
+        .menu-item-badge {
+            background: #fff;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .parceiro-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .parceiro-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .parceiro-info { flex: 1; }
+        .parceiro-name { font-weight: 700; color: #333; }
+        .parceiro-status-text { color: #888; font-size: 0.9rem; }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">❤️ Nosso App</div>
+            <div class="header-user">
+                <span class="saldo-badge">{{ usuario.saldo }} pts</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Sair</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Welcome -->
+        <div class="card">
+            <div class="welcome-msg">Olá, {{ usuario.nome }}! 👋</div>
+            
+            {% if parceiro %}
+                <div class="parceiro-status">
+                    <div class="parceiro-avatar">{{ parceiro.emoji }}</div>
+                    <div class="parceiro-info">
+                        <div class="parceiro-name">{{ parceiro.nome }}</div>
+                        <div class="parceiro-status-text">Seu parceiro(a) • {{ parceiro.saldo }} pts</div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="casal-info">
+                    <div style="font-size: 0.9rem; color: #856404; margin-bottom: 5px;">Código do casal:</div>
+                    <div class="casal-code">{{ casal.codigo }}</div>
+                    <div style="font-size: 0.85rem; color: #856404; margin-top: 5px;">
+                        Compartilhe com seu parceiro(a) para vincular!
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Menu -->
+        <div class="card">
+            <div class="card-title">O que deseja fazer?</div>
+            <div class="menu-grid">
+                <a href="{{ url_for('pagina_tarefas') }}" class="menu-item">
+                    <div class="menu-item-icon">📝</div>
+                    <div class="menu-item-title">Tarefas</div>
+                    {% if tarefas_pendentes > 0 %}
+                        <span class="menu-item-badge">{{ tarefas_pendentes }} pendentes</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('pagina_sugerir_recompensa') }}" class="menu-item">
+                    <div class="menu-item-icon">💡</div>
+                    <div class="menu-item-title">Recompensas</div>
+                </a>
+                <a href="{{ url_for('pagina_aprovacoes') }}" class="menu-item">
+                    <div class="menu-item-icon">⚖️</div>
+                    <div class="menu-item-title">Aprovar</div>
+                    {% if recompensas_para_aprovar > 0 %}
+                        <span class="menu-item-badge">{{ recompensas_para_aprovar }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('pagina_loja') }}" class="menu-item">
+                    <div class="menu-item-icon">🛒</div>
+                    <div class="menu-item-title">Loja</div>
+                    {% if recompensas_aprovadas > 0 %}
+                        <span class="menu-item-badge">{{ recompensas_aprovadas }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('pagina_historico_resgates') }}" class="menu-item">
+                    <div class="menu-item-icon">📜</div>
+                    <div class="menu-item-title">Historico</div>
+                    {% if vales_pendentes > 0 %}
+                        <span class="menu-item-badge">{{ vales_pendentes }} vale(s)</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="card">
+            <div class="card-title">📊 Resumo</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; text-align: center;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #4CAF50;">{{ usuario.pontos_ganhos }}</div>
+                    <div style="font-size: 0.85rem; color: #888;">Pontos Ganhos</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #f44336;">{{ usuario.pontos_gastos }}</div>
+                    <div style="font-size: 0.85rem; color: #888;">Pontos Gastos</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Código do Casal - Sempre visível -->
+        <div class="card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+            <div class="card-title">🔑 Código do Casal</div>
+            <div style="text-align: center;">
+                <div style="background: white; padding: 15px; border-radius: 15px; margin: 10px 0; border: 2px dashed #d35400;">
+                    <div style="font-size: 2rem; font-weight: 800; color: #d35400; letter-spacing: 4px; font-family: monospace;">
+                        {{ casal.codigo }}
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; color: #856404; margin-top: 10px;">
+                    {% if parceiro %}
+                        Compartilhe este código para convidar outros casais (futuro recurso)
+                    {% else %}
+                        Compartilhe este código com seu parceiro(a) para vincular!
+                    {% endif %}
+                </p>
+                <button onclick="copiarCodigoCasal()" class="logout-btn" style="background: #d35400; margin-top: 10px; cursor: pointer; border: none;">
+                    📋 Copiar Código
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copiarCodigoCasal() {
+            const codigo = '{{ casal.codigo }}';
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(codigo).then(function() {
+                    alert('Código copiado: ' + codigo);
+                });
+            } else {
+                const textArea = document.createElement('textarea');
+                textArea.value = codigo;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Código copiado: ' + codigo);
+            }
+        }
+    </script>
+</body>
+</html>

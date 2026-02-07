@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico - {{ usuario.nome }}{% endblock %}
+{% block header_title %}🎫 Hist. Resgates{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+
+<div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <a href="{{ url_for('pagina_historico_conclusoes') }}" class="btn" style="flex: 1; background: #f0f0f0; color: #666;">Conclusões</a>
+    <a href="{{ url_for('pagina_historico_resgates') }}" class="btn btn-primary" style="flex: 1;">Resgates</a>
+</div>
+
+<!-- Meus Vales -->
+<div class="card">
+    <div class="card-title">Meus Vales ({{ meus_vales|length }})</div>
+    
+    {% if meus_vales %}
+        {% for vale in meus_vales %}
+        <div class="vale {% if vale.utilizado %}usado{% endif %}">
+            <div class="item-header">
+                <span class="vale-title">{{ vale.recompensa.titulo }}</span>
+                {% if not vale.utilizado %}
+                <span class="badge badge-info">Válido</span>
+                {% else %}
+                <span class="badge badge-success">Usado</span>
+                {% endif %}
+            </div>
+            {% if vale.recompensa.foto %}
+            <img src="{{ url_for('uploaded_file', filename=vale.recompensa.foto) }}" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;" alt="{{ vale.recompensa.titulo }}">
+            {% endif %}
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
+                Resgatado em {{ vale.data_resgate.strftime('%d/%m/%Y') }} por {{ vale.custo }} pts
+            </p>
+            {% if not vale.utilizado %}
+            <a href="{{ url_for('usar_vale', id=vale.id) }}" class="btn btn-success btn-small">✓ Marcar como usado</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Você ainda não resgatou nenhum vale.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Vales do Parceiro -->
+<div class="card">
+    <div class="card-title">💝 Vales de {{ parceiro.nome }} ({{ vales_parceiro|length }})</div>
+    
+    {% if vales_parceiro %}
+        {% for vale in vales_parceiro %}
+        <div class="vale" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-color: #2196F3;">
+            <div class="item-header">
+                <span class="vale-title" style="color: #1565C0;">{{ vale.recompensa.titulo }}</span>
+                <span class="badge badge-warning">Pendente</span>
+            </div>
+            {% if vale.recompensa.foto %}
+            <img src="{{ url_for('uploaded_file', filename=vale.recompensa.foto) }}" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;" alt="{{ vale.recompensa.titulo }}">
+            {% endif %}
+            <p style="font-size: 0.85rem; color: #555;">
+                {{ parceiro.nome }} resgatou em {{ vale.data_resgate.strftime('%d/%m/%Y') }}
+            </p>
+            {% if vale.recompensa.descricao %}
+            <p style="font-size: 0.85rem; color: #666; font-style: italic;">
+                "{{ vale.recompensa.descricao }}"
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✨</div>
+            <p>{{ parceiro.nome }} não tem vales pendentes.<br>Você está livre! 😄</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

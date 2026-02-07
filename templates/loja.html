@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Loja - {{ usuario.nome }}{% endblock %}
+{% block header_title %}🛒 Loja de Pontos{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+
+<div class="card">
+    <div class="card-title">Suas Recompensas Aprovadas</div>
+    
+    {% if minhas_recompensas_aprovadas %}
+        <div class="info-box">
+            💰 Você tem {{ usuario.saldo }} pontos disponíveis
+        </div>
+        
+        {% for recompensa in minhas_recompensas_aprovadas %}
+        <div class="item" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 1px solid #81c784;">
+            {% if recompensa.foto %}
+            <img src="{{ url_for('uploaded_file', filename=recompensa.foto) }}" class="item-foto" alt="{{ recompensa.titulo }}">
+            {% endif %}
+            <div class="item-header">
+                <span class="item-title">{{ recompensa.titulo }}</span>
+                <span class="badge badge-success">Aprovada</span>
+            </div>
+            {% if recompensa.descricao %}
+            <div class="item-desc">{{ recompensa.descricao }}</div>
+            {% endif %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <span class="item-points" style="background: #4caf50;">{{ recompensa.custo }} pts</span>
+                {% if usuario.saldo >= recompensa.custo %}
+                <form action="{{ url_for('resgatar', recompensa_id=recompensa.id) }}" method="POST">
+                    <button type="submit" class="btn btn-primary btn-small">Resgatar</button>
+                </form>
+                {% else %}
+                <button class="btn btn-small" disabled style="background: #ccc; cursor: not-allowed;">Pontos insuficientes</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Você não tem recompensas aprovadas.<br><a href="{{ url_for('pagina_sugerir_recompensa') }}" style="color: #667eea;">Sugira uma recompensa!</a></p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

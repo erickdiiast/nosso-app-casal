@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarefas - Nosso App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 1.3rem; font-weight: 800; color: #333; }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; color: #555; font-weight: 600; font-size: 0.9rem; }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+        }
+        .checkbox-label input { width: auto; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 8px 15px;
+            width: auto;
+            font-size: 0.85rem;
+        }
+        .item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid transparent;
+        }
+        .item.recorrente { border-left-color: #FF9800; }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .item-title { font-weight: 700; color: #333; font-size: 1rem; }
+        .item-points {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .item-desc { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+        .item-meta { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .badge-recorrente {
+            font-size: 0.75rem;
+            background: #FF9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        .file-input-label {
+            display: block;
+            padding: 10px;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-error { background: #f8d7da; color: #721c24; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 15px; }
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #888;
+            font-weight: 600;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+            <div class="header-title">📝 Tarefas</div>
+            <div></div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if not parceiro %}
+        <div class="flash flash-info">
+            ⚠️ Aguardando seu parceiro(a) se vincular ao casal. 
+            Compartilhe o código: <strong>{{ casal.codigo }}</strong>
+        </div>
+        {% endif %}
+        
+        <!-- Criar nova tarefa -->
+        <div class="card">
+            <div class="card-title">Criar Tarefa para {{ parceiro.nome if parceiro else 'Parceiro' }}</div>
+            <form action="{{ url_for('criar_tarefa') }}" method="POST">
+                <div class="form-group">
+                    <label>Titulo da tarefa</label>
+                    <input type="text" name="titulo" placeholder="Ex: Lavar a louca" required 
+                           {{ 'disabled' if not parceiro }}>
+                </div>
+                <div class="form-group">
+                    <label>Descricao (opcional)</label>
+                    <textarea name="descricao" rows="2" placeholder="Detalhes da tarefa..."
+                              {{ 'disabled' if not parceiro }}></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="recorrente" value="1" id="chk-recorrente"
+                               {{ 'disabled' if not parceiro }}>
+                        <span>🔁 Tarefa recorrente</span>
+                    </label>
+                </div>
+                <div class="form-group" id="frequencia-group" style="display: none;">
+                    <label>Frequencia</label>
+                    <select name="frequencia" {{ 'disabled' if not parceiro }}>
+                        <option value="diaria">📅 Diaria (todo dia)</option>
+                        <option value="semanal">📅 Semanal (toda semana)</option>
+                        <option value="quinzenal">📅 Quinzenal (a cada 15 dias)</option>
+                        <option value="mensal">📅 Mensal (todo mes)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pontos</label>
+                    <input type="number" name="pontos" value="10" min="1" required
+                           {{ 'disabled' if not parceiro }}>
+                </div>
+                <button type="submit" class="btn btn-primary" {{ 'disabled' if not parceiro }}>
+                    Criar Tarefa
+                </button>
+            </form>
+            
+            <script>
+                document.getElementById('chk-recorrente').addEventListener('change', function() {
+                    document.getElementById('frequencia-group').style.display = 
+                        this.checked ? 'block' : 'none';
+                });
+            </script>
+        </div>
+        
+        <!-- Minhas tarefas pendentes -->
+        <div class="card">
+            <div class="card-title">⏳ Minhas Tarefas Pendentes ({{ minhas_tarefas|length }})</div>
+            
+            {% if minhas_tarefas %}
+                {% for tarefa in minhas_tarefas %}
+                <div class="item {{ 'recorrente' if tarefa.recorrente }}">
+                    <div class="item-header">
+                        <span class="item-title">
+                            {{ tarefa.titulo }}
+                            {% if tarefa.recorrente %}
+                                <span class="badge-recorrente">
+                                    {{ {'diaria': 'Diaria', 'semanal': 'Semanal', 'quinzenal': 'Quinzenal', 'mensal': 'Mensal'}.get(tarefa.frequencia, 'Recorrente') }}
+                                </span>
+                            {% endif %}
+                        </span>
+                        <span class="item-points">+{{ tarefa.pontos }} pts</span>
+                    </div>
+                    {% if tarefa.descricao %}
+                    <div class="item-desc">{{ tarefa.descricao }}</div>
+                    {% endif %}
+                    <div class="item-meta">Criada por: {{ tarefa.criado_por.nome }}</div>
+                    
+                    <form action="{{ url_for('concluir_tarefa', id=tarefa.id) }}" method="POST" 
+                          enctype="multipart/form-data">
+                        <div class="file-input-wrapper">
+                            <input type="file" name="foto_comprovacao" id="foto-{{ tarefa.id }}" 
+                                   accept="image/*">
+                            <label for="foto-{{ tarefa.id }}" class="file-input-label">
+                                📷 Tirar foto de comprovacao (opcional)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            ✓ Marcar como Concluida
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎉</div>
+                    <p>Voce nao tem tarefas pendentes!<br>Aproveite para descansar!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Tarefas que criei -->
+        <div class="card">
+            <div class="card-title">📋 Tarefas de {{ parceiro.nome if parceiro else 'Parceiro' }} ({{ tarefas_criadas|length }})</div>
+            
+            {% if tarefas_criadas %}
+                {% for tarefa in tarefas_criadas %}
+                <div class="item {{ 'recorrente' if tarefa.recorrente }}">
+                    <div class="item-header">
+                        <span class="item-title">
+                            {{ tarefa.titulo }}
+                            {% if tarefa.recorrente %}
+                                <span class="badge-recorrente">
+                                    {{ {'diaria': 'Diaria', 'semanal': 'Semanal', 'quinzenal': 'Quinzenal', 'mensal': 'Mensal'}.get(tarefa.frequencia, 'Recorrente') }}
+                                </span>
+                            {% endif %}
+                        </span>
+                        <span class="item-points">+{{ tarefa.pontos }} pts</span>
+                    </div>
+                    {% if tarefa.descricao %}
+                    <div class="item-desc">{{ tarefa.descricao }}</div>
+                    {% endif %}
+                    <div class="item-meta" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Aguardando {{ parceiro.nome if parceiro else 'parceiro' }}</span>
+                        <a href="{{ url_for('excluir_tarefa', id=tarefa.id) }}" class="btn btn-danger" 
+                           onclick="return confirm('Remover tarefa?')">Remover</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">🤔</div>
+                    <p>Voce ainda nao criou tarefas.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

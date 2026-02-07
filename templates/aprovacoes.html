@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Aprovações - {{ usuario.nome }}{% endblock %}
+{% block header_title %}⚖️ Aprovações{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+
+<div class="card">
+    <div class="card-title">Recompensas de {{ parceiro.nome }}</div>
+    
+    {% if recompensas_para_aprovar %}
+        <div class="info-box success">
+            👍 {{ recompensas_para_aprovar|length }} recompensa(s) para analisar
+        </div>
+        
+        {% for recompensa in recompensas_para_aprovar %}
+        <div class="approval-item">
+            <div class="item-header" style="margin-bottom: 10px;">
+                <span class="item-title" style="color: #f57c00; font-size: 1.1rem;">{{ recompensa.titulo }}</span>
+            </div>
+            
+            {% if recompensa.foto %}
+            <img src="{{ url_for('uploaded_file', filename=recompensa.foto) }}" class="item-foto" alt="{{ recompensa.titulo }}">
+            {% endif %}
+            
+            {% if recompensa.descricao %}
+            <div class="item-desc">{{ recompensa.descricao }}</div>
+            {% endif %}
+            
+            <div style="background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                <strong>Custo sugerido:</strong> {{ recompensa.custo_sugerido }} pts
+            </div>
+            
+            <form action="{{ url_for('aprovar_recompensa', id=recompensa.id) }}" method="POST">
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 0.9rem; color: #666; margin-bottom: 5px; display: block;">Defina o custo final:</label>
+                    <input type="number" name="custo" value="{{ recompensa.custo_sugerido }}" min="1" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;">
+                </div>
+                <div class="approval-actions">
+                    <button type="submit" name="acao" value="aprovar" class="btn btn-success">✓ Aprovar</button>
+                    <button type="submit" name="acao" value="rejeitar" class="btn btn-danger" onclick="return confirm('Rejeitar essa recompensa?')">✗ Rejeitar</button>
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <p>Nenhuma recompensa pendente!<br>{{ parceiro.nome }} não sugeriu nada novo.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

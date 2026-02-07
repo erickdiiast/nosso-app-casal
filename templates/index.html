@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❤️ Nosso App de Tarefas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        /* Placar */
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .player-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .player-points {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+        
+        .player-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* Seções */
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Formulários */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+        
+        /* Listas */
+        .item-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .item:hover {
+            background: #e9ecef;
+        }
+        
+        .item-content h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .item-content p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .item-points {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        /* Flash messages */
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        /* Vales */
+        .vale {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 2px dashed #e67e22;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .vale.usado {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        .vale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .vale-title {
+            font-weight: 700;
+            color: #d35400;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>❤️ Nosso App de Tarefas</h1>
+            <p>Complete tarefas, ganhe pontos e troque por recompensas especiais!</p>
+        </header>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Placar -->
+        <div class="scoreboard">
+            {% for usuario in usuarios %}
+            <div class="player-card">
+                <div class="player-avatar" style="background: {{ usuario.cor }}20; color: {{ usuario.cor }};">
+                    {{ '👨' if loop.index == 1 else '👩' }}
+                </div>
+                <div class="player-name">{{ usuario.nome }}</div>
+                <div class="player-points">{{ usuario.saldo }}</div>
+                <div class="player-label">pontos disponíveis</div>
+                <div style="margin-top: 10px; font-size: 0.85rem; color: #888;">
+                    Ganhou: {{ usuario.pontos }} | Gastou: {{ usuario.pontos_gastos }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="sections">
+            <!-- Nova Tarefa -->
+            <div class="section">
+                <h2 class="section-title">📝 Nova Tarefa</h2>
+                <form action="{{ url_for('add_tarefa') }}" method="POST">
+                    <div class="form-group">
+                        <input type="text" name="titulo" placeholder="Nome da tarefa (ex: Lavar louça)" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="descricao" rows="2" placeholder="Descrição opcional..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="number" name="pontos" placeholder="Pontos" value="10" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Criar</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Nova Recompensa -->
+            <div class="section">
+                <h2 class="section-title">🎁 Nova Recompensa</h2>
+                <form action="{{ url_for('add_recompensa') }}" method="POST">
+                    <div class="form-group">
+                        <input type="text" name="titulo" placeholder="Recompensa (ex: Massagem de 30min)" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="descricao" rows="2" placeholder="Detalhes da recompensa..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="number" name="custo" placeholder="Custo em pontos" value="50" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Criar</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Tarefas Pendentes -->
+            <div class="section">
+                <h2 class="section-title">⏳ Tarefas Pendentes ({{ tarefas_pendentes|length }})</h2>
+                <div class="item-list">
+                    {% for tarefa in tarefas_pendentes %}
+                    <div class="item">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <h4>{{ tarefa.titulo }}</h4>
+                                <span class="item-points">+{{ tarefa.pontos }}</span>
+                            </div>
+                            {% if tarefa.descricao %}
+                            <p>{{ tarefa.descricao }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="item-actions">
+                            <form action="{{ url_for('concluir_tarefa', id=tarefa.id) }}" method="POST" style="display: flex; gap: 5px;">
+                                <select name="usuario_id" required style="padding: 5px 10px; border-radius: 8px; border: 1px solid #ddd;">
+                                    <option value="">Quem?</option>
+                                    {% for usuario in usuarios %}
+                                    <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-success btn-small">✓</button>
+                            </form>
+                            <a href="{{ url_for('delete_tarefa', id=tarefa.id) }}" class="btn btn-danger btn-small" onclick="return confirm('Remover tarefa?')">×</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #888; padding: 20px;">Nenhuma tarefa pendente! 🎉</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Loja de Recompensas -->
+            <div class="section">
+                <h2 class="section-title">🛒 Loja de Recompensas</h2>
+                <div class="item-list">
+                    {% for recompensa in recompensas %}
+                    <div class="item" style="background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); border: 1px solid #ffcdd2;">
+                        <div class="item-content">
+                            <h4>{{ recompensa.titulo }}</h4>
+                            {% if recompensa.descricao %}
+                            <p>{{ recompensa.descricao }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="item-actions">
+                            <span class="item-points" style="background: #e91e63;">{{ recompensa.custo }} pts</span>
+                            <form action="{{ url_for('resgatar', recompensa_id=recompensa.id) }}" method="POST" style="display: flex; gap: 5px;">
+                                <select name="usuario_id" required style="padding: 5px 10px; border-radius: 8px; border: 1px solid #ddd;">
+                                    <option value="">Quem?</option>
+                                    {% for usuario in usuarios %}
+                                    <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-small">Resgatar</button>
+                            </form>
+                            <a href="{{ url_for('delete_recompensa', id=recompensa.id) }}" class="btn btn-danger btn-small" onclick="return confirm('Remover recompensa?')">×</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #888; padding: 20px;">Nenhuma recompensa cadastrada</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Histórico de Tarefas -->
+            <div class="section">
+                <h2 class="section-title">📜 Tarefas Concluídas</h2>
+                <div class="item-list">
+                    {% for tarefa in tarefas_concluidas %}
+                    <div class="item" style="opacity: 0.8;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h4 style="text-decoration: line-through;">{{ tarefa.titulo }}</h4>
+                                <span class="badge badge-success">+{{ tarefa.pontos }}</span>
+                            </div>
+                            <p style="font-size: 0.85rem;">
+                                Feito por: <strong>{{ tarefa.usuario.nome }}</strong> em {{ tarefa.data_conclusao.strftime('%d/%m') }}
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #888; padding: 20px;">Nenhuma tarefa concluída ainda</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Vales Resgatados -->
+            <div class="section">
+                <h2 class="section-title">🎫 Vales Resgatados</h2>
+                <div class="item-list">
+                    {% for resgate in resgates %}
+                    <div class="vale {% if resgate.utilizado %}usado{% endif %}">
+                        <div class="vale-header">
+                            <span class="vale-title">🎁 {{ resgate.recompensa.titulo }}</span>
+                            {% if not resgate.utilizado %}
+                            <span class="badge badge-info">Válido</span>
+                            {% else %}
+                            <span class="badge badge-success">Usado</span>
+                            {% endif %}
+                        </div>
+                        <p style="font-size: 0.9rem; color: #666;">
+                            Resgatado por: <strong>{{ resgate.usuario.nome }}</strong> em {{ resgate.data_resgate.strftime('%d/%m/%Y') }}
+                        </p>
+                        {% if not resgate.utilizado %}
+                        <a href="{{ url_for('usar_resgate', id=resgate.id) }}" class="btn btn-success btn-small" style="margin-top: 10px;">
+                            ✓ Marcar como usado
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #888; padding: 20px;">Nenhum vale resgatado ainda</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

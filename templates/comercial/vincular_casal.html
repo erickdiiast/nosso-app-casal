@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vincular Casal - Nosso App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+        }
+        .logo { text-align: center; font-size: 4rem; margin-bottom: 10px; }
+        h1 { text-align: center; color: #333; font-size: 1.8rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        
+        .option-box {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .option-box:hover { border-color: #667eea; transform: translateY(-2px); }
+        .option-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .option-desc {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4); }
+        
+        .form-group { margin-top: 15px; }
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        input[type="text"]:focus { outline: none; border-color: #4CAF50; }
+        
+        .flash {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-error { background: #f8d7da; color: #721c24; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .flash-warning { background: #fff3cd; color: #856404; }
+        
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #888;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .logout { text-align: center; margin-top: 20px; }
+        .logout a { color: #888; text-decoration: none; font-size: 0.9rem; }
+        .logout a:hover { color: #667eea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">💕</div>
+        <h1>Bem-vindo(a), {{ usuario.nome }}!</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Se já tem casal mas não tem parceiro, mostra o código -->
+        {% if casal %}
+            <p class="subtitle">🎉 Casal criado! Aguardando seu parceiro(a)</p>
+            
+            <div class="option-box" style="border-color: #4CAF50; background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);">
+                <div class="option-title">🔑 Código do seu casal</div>
+                <div class="option-desc">
+                    Compartilhe este código com seu parceiro(a). Ele(a) precisa criar uma conta e usar este código para vincular-se.
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 15px; text-align: center; margin: 15px 0; border: 3px dashed #4CAF50;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #4CAF50; letter-spacing: 5px; font-family: monospace;">
+                        {{ casal.codigo }}
+                    </div>
+                </div>
+                <button onclick="copiarCodigo()" class="btn btn-success" style="margin-bottom: 10px;">📋 Copiar código</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Ir para o Dashboard →</a>
+            </div>
+            
+            <div class="divider"><span>OU</span></div>
+            
+            <!-- Opção para entrar com código (caso queira trocar) -->
+            <div class="option-box">
+                <div class="option-title">🔗 Já tem um código diferente?</div>
+                <div class="option-desc">
+                    Se seu parceiro já criou outro casal, você pode sair deste e entrar no dele.
+                </div>
+                <form method="POST" action="{{ url_for('entrar_casal') }}">
+                    <div class="form-group">
+                        <input type="text" name="codigo" placeholder="EX: ABC123" maxlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Trocar de casal</button>
+                </form>
+            </div>
+            
+        {% else %}
+            <p class="subtitle">Agora vamos conectar você com seu parceiro(a)</p>
+            
+            <!-- Opção 1: Criar novo casal -->
+            <div class="option-box">
+                <div class="option-title">👫 Criar novo casal</div>
+                <div class="option-desc">
+                    Crie um casal novo e receba um código de convite para enviar ao seu parceiro(a).
+                </div>
+                <form method="POST" action="{{ url_for('criar_casal') }}">
+                    <button type="submit" class="btn btn-primary">Criar meu casal</button>
+                </form>
+            </div>
+        
+        <div class="divider"><span>OU</span></div>
+        
+        <!-- Opção 2: Entrar com código -->
+        <div class="option-box">
+            <div class="option-title">🔗 Já tenho código</div>
+            <div class="option-desc">
+                Seu parceiro(a) já criou um casal? Digite o código de convite que ele(a) te enviou.
+            </div>
+            <form method="POST" action="{{ url_for('entrar_casal') }}">
+                <div class="form-group">
+                    <input type="text" name="codigo" placeholder="EX: ABC123" maxlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-success">Vincular-me</button>
+            </form>
+        </div>
+        
+        <div class="logout">
+            <a href="{{ url_for('logout') }}">← Sair da conta</a>
+        </div>
+        
+        {% endif %}
+    </div>
+    
+    <script>
+        function copiarCodigo() {
+            const codigo = '{{ casal.codigo if casal else "" }}';
+            if (codigo) {
+                navigator.clipboard.writeText(codigo).then(function() {
+                    alert('Código copiado: ' + codigo);
+                }, function(err) {
+                    // Fallback para browsers antigos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codigo;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Código copiado: ' + codigo);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

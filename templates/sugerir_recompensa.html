@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Sugerir Recompensa - {{ usuario.nome }}{% endblock %}
+{% block header_title %}💡 Sugerir Recompensa{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Voltar</a>
+
+<!-- Sugerir nova recompensa -->
+<div class="card">
+    <div class="card-title">O que você quer receber?</div>
+    <div class="info-box warning">
+        A recompensa precisa ser aprovada por {{ parceiro.nome }}!
+    </div>
+    <form action="{{ url_for('sugerir_recompensa') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="text" name="titulo" placeholder="Ex: Massagem de 30min" required>
+        </div>
+        <div class="form-group">
+            <textarea name="descricao" rows="2" placeholder="Detalhes da recompensa..."></textarea>
+        </div>
+        <div class="form-group">
+            <div class="file-input-wrapper">
+                <input type="file" name="foto" id="foto-recompensa" accept="image/*">
+                <label for="foto-recompensa" class="file-input-label">
+                    🎁 Adicionar foto ilustrativa (opcional)
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="number" name="custo_sugerido" placeholder="Custo sugerido em pontos" value="50" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-warning">Sugerir Recompensa</button>
+    </form>
+</div>
+
+<!-- Minhas recompensas pendentes -->
+{% if minhas_pendentes %}
+<div class="card">
+    <div class="card-title">⏳ Aguardando Aprovação ({{ minhas_pendentes|length }})</div>
+    {% for recompensa in minhas_pendentes %}
+    <div class="item" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 1px solid #ffb74d;">
+        {% if recompensa.foto %}
+        <img src="{{ url_for('uploaded_file', filename=recompensa.foto) }}" class="item-foto" alt="{{ recompensa.titulo }}">
+        {% endif %}
+        <div class="item-header">
+            <span class="item-title">{{ recompensa.titulo }}</span>
+            <span class="badge badge-warning">Pendente</span>
+        </div>
+        {% if recompensa.descricao %}
+        <div class="item-desc">{{ recompensa.descricao }}</div>
+        {% endif %}
+        <div class="item-meta" style="justify-content: space-between;">
+            <span>Custo sugerido: {{ recompensa.custo_sugerido }} pts</span>
+            <a href="{{ url_for('excluir_recompensa', id=recompensa.id) }}" class="btn btn-danger btn-small" onclick="return confirm('Cancelar?')">Cancelar</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Minhas recompensas rejeitadas -->
+{% if minhas_rejeitadas %}
+<div class="card">
+    <div class="card-title">❌ Rejeitadas</div>
+    {% for recompensa in minhas_rejeitadas %}
+    <div class="item" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border: 1px solid #e57373; opacity: 0.8;">
+        {% if recompensa.foto %}
+        <img src="{{ url_for('uploaded_file', filename=recompensa.foto) }}" class="item-foto" alt="{{ recompensa.titulo }}">
+        {% endif %}
+        <div class="item-header">
+            <span class="item-title">{{ recompensa.titulo }}</span>
+            <span class="badge badge-danger">Rejeitada</span>
+        </div>
+        <div class="item-meta">
+            <a href="{{ url_for('excluir_recompensa', id=recompensa.id) }}" class="btn btn-danger btn-small">Remover</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
