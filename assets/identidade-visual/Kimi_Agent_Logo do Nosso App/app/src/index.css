@@ -1,0 +1,315 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Cores principais - tema romântico */
+  --primary: 320 70% 55%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 160 60% 45%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --accent: 45 90% 55%;
+  --accent-foreground: 0 0% 15%;
+  
+  --background: 0 0% 98%;
+  --foreground: 320 20% 20%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 320 20% 20%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 320 20% 20%;
+  
+  --muted: 320 20% 95%;
+  --muted-foreground: 320 10% 50%;
+  
+  --border: 320 30% 90%;
+  --input: 320 30% 90%;
+  --ring: 320 70% 55%;
+  
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --radius: 1rem;
+  
+  /* Cores customizadas do app */
+  --love-pink: #E91E63;
+  --love-rose: #FF80AB;
+  --love-purple: #9C27B0;
+  --love-green: #4CAF50;
+  --love-teal: #009688;
+  --love-gold: #FFC107;
+  --love-orange: #FF9800;
+  --love-blue: #2196F3;
+}
+
+.dark {
+  --background: 320 20% 10%;
+  --foreground: 0 0% 95%;
+  --card: 320 20% 12%;
+  --card-foreground: 0 0% 95%;
+  --popover: 320 20% 12%;
+  --popover-foreground: 0 0% 95%;
+  --muted: 320 15% 20%;
+  --muted-foreground: 320 10% 60%;
+  --border: 320 15% 25%;
+  --input: 320 15% 25%;
+  --ring: 320 70% 55%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+/* Animações */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-heart {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounce-in {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.3); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+  70% { 
+    transform: scale(0.9); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) rotate(720deg);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-heart {
+  animation: pulse-heart 1.5s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+/* Gradientes românticos */
+.gradient-love {
+  background: linear-gradient(135deg, var(--love-pink) 0%, var(--love-purple) 100%);
+}
+
+.gradient-love-soft {
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(156, 39, 176, 0.1) 100%);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, var(--love-gold) 0%, var(--love-orange) 100%);
+}
+
+/* Cards com sombra suave */
+.card-love {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-love:hover {
+  box-shadow: 0 8px 30px rgba(233, 30, 99, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Botões arredondados */
+.btn-love {
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+}
+
+.btn-love:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+}
+
+.btn-love:active {
+  transform: translateY(0);
+}
+
+/* Inputs estilizados */
+.input-love {
+  border-radius: 9999px;
+  border: 2px solid hsl(var(--border));
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.25rem;
+}
+
+.input-love:focus {
+  border-color: var(--love-pink);
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+  outline: none;
+}
+
+/* Badges de pontos */
+.badge-points {
+  background: linear-gradient(135deg, var(--love-gold) 0%, var(--love-orange) 100%);
+  color: white;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--love-pink) 0%, var(--love-purple) 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--love-rose) 0%, var(--love-pink) 100%);
+}
+
+/* Confetti effect */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  animation: confetti 3s ease-out forwards;
+}
+
+/* Avatar com borda colorida */
+.avatar-colored {
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, var(--love-pink) 0%, var(--love-purple) 100%) border-box;
+}
+
+/* Status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background: var(--love-green);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+.status-dot.pending {
+  background: var(--love-gold);
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+}
+
+/* Mobile-first responsive */
+@media (max-width: 640px) {
+  :root {
+    --radius: 0.875rem;
+  }
+  
+  .card-love {
+    border-radius: calc(var(--radius) * 0.75);
+  }
+}
+
+/* Dark mode adjustments */
+.dark .card-love {
+  background: hsl(var(--card));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Utility classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--love-pink) 0%, var(--love-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-pattern-hearts {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 35l-2-2c-6-6-10-10-10-16 0-4 3-7 7-7 2 0 4 1 5 3 1-2 3-3 5-3 4 0 7 3 7 7 0 6-4 10-10 16l-2 2z' fill='%23E91E63' fill-opacity='0.05'/%3E%3C/svg%3E");
+}
