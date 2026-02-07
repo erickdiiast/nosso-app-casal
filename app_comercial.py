@@ -12,11 +12,15 @@ Funcionalidades:
 =================================================================
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, send_file, g
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from functools import wraps
 from datetime import datetime
-import hashlib
+import bcrypt
 import os
 import uuid
 import random
@@ -24,13 +28,73 @@ import string
 
 import sys
 import io
+import logging
+from logging.handlers import RotatingFileHandler
+
 # Configurar encoding UTF-8 para Windows
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
+# Configurar logging de segurança
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+security_handler = RotatingFileHandler(
+    'logs/security.log', maxBytes=1048576, backupCount=5
+)
+security_handler.setLevel(logging.WARNING)
+security_handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(levelname)s - %(message)s'
+))
+
+app_logger = logging.getLogger('security')
+app_logger.addHandler(security_handler)
+app_logger.setLevel(logging.WARNING)
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'casal-comercial-2024-secreto'
+# Security: Generate a strong random secret key in production
+# Use: python -c "import secrets; print(secrets.token_hex(32))"
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'casal-comercial-2024-secreto-dev-only')
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour
+
+# Session Security
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevents XSS access to session cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session timeout
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Initialize Rate Limiter (anti-brute force)
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
+# Initialize Security Headers
+Talisman(app, 
+    force_https=False,  # Set to True in production with HTTPS
+    strict_transport_security=False,  # Enable in production
+    content_security_policy={
+        'default-src': "'self'",
+        'script-src': ["'self'", "'unsafe-inline'"],  # Allow inline for now
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        'font-src': ["'self'", "https://fonts.gstatic.com"],
+        'img-src': ["'self'", "data:", "blob:"],
+        'connect-src': "'self'",
+    },
+    referrer_policy='strict-origin-when-cross-origin',
+    feature_policy={
+        'geolocation': "'none'",
+        'microphone': "'none'",
+        'camera': "'self'",
+    }
+)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///casal_comercial.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads_comercial'
@@ -121,8 +185,8 @@ class Usuario(db.Model):
         return self.pontos_ganhos - self.pontos_gastos
     
     def verificar_senha(self, senha):
-        """Verifica se a senha está correta"""
-        return self.senha_hash == hashlib.sha256(senha.encode()).hexdigest()
+        """Verifica se a senha está correta usando bcrypt"""
+        return bcrypt.checkpw(senha.encode('utf-8'), self.senha_hash.encode('utf-8'))
     
     def tem_parceiro(self):
         """Verifica se o usuário tem um parceiro vinculado"""
@@ -244,30 +308,112 @@ def get_current_user():
     return None
 
 
+def validar_imagem_conteudo(arquivo):
+    """Valida se o arquivo é realmente uma imagem pelo conteúdo (magic numbers)"""
+    magic_numbers = {
+        b'\xff\xd8\xff': 'jpg',
+        b'\x89PNG\r\n\x1a\n': 'png',
+        b'GIF87a': 'gif',
+        b'GIF89a': 'gif',
+        b'RIFF': 'webp',  # WebP começa com RIFF
+        b'\x00\x00\x00 ftyp': 'heic',
+    }
+    
+    header = arquivo.read(16)
+    arquivo.seek(0)  # Reset pointer
+    
+    for magic, ext in magic_numbers.items():
+        if header.startswith(magic):
+            return True
+    return False
+
+
 def salvar_foto(arquivo, pasta):
-    """Salva a foto e retorna o caminho"""
+    """Salva a foto com validação de segurança"""
     if not arquivo or not arquivo.filename:
         return None
     if '.' not in arquivo.filename:
         return None
     
+    # Validar extensão
     ext = arquivo.filename.rsplit('.', 1)[1].lower()
-    extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'tiff']
+    extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp']
     
     if ext not in extensoes_permitidas:
+        flash('Tipo de arquivo não permitido!', 'error')
+        return None
+    
+    # Validar conteúdo do arquivo (magic numbers)
+    if not validar_imagem_conteudo(arquivo):
+        flash('Arquivo inválido!', 'error')
+        return None
+    
+    # Validar tamanho (máximo 5MB para segurança)
+    arquivo.seek(0, 2)  # Ir para o final
+    tamanho = arquivo.tell()
+    arquivo.seek(0)  # Reset
+    
+    if tamanho > 5 * 1024 * 1024:  # 5MB
+        flash('Arquivo muito grande! Máximo 5MB.', 'error')
         return None
     
     try:
         pasta_completa = os.path.join(app.config['UPLOAD_FOLDER'], pasta)
         os.makedirs(pasta_completa, exist_ok=True)
+        
+        # Gerar nome seguro
         filename = f"{uuid.uuid4().hex}.{ext}"
         caminho_completo = os.path.join(pasta_completa, filename)
+        
+        # Salvar arquivo
         arquivo.save(caminho_completo)
+        
+        # Verificar se foi salvo corretamente
         if os.path.exists(caminho_completo):
             return f"{pasta}/{filename}"
     except Exception as e:
-        print(f"Erro ao salvar foto: {e}")
+        app.logger.error(f"Erro ao salvar foto: {e}")
+        flash('Erro ao salvar arquivo!', 'error')
+    
     return None
+
+
+# =================================================================
+# FUNÇÕES DE VALIDAÇÃO
+# =================================================================
+
+import re
+
+def validar_username(username):
+    """Valida formato do username (apenas letras, números, underline, 3-20 chars)"""
+    if not username or len(username) < 3 or len(username) > 20:
+        return False
+    return re.match(r'^[a-zA-Z0-9_]+$', username) is not None
+
+
+def validar_email(email):
+    """Valida formato do email"""
+    if not email or len(email) > 120:
+        return False
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+
+def validar_senha(senha):
+    """Valida força da senha (mínimo 6 caracteres)"""
+    if not senha or len(senha) < 6:
+        return False
+    return True
+
+
+def sanitizar_input(texto):
+    """Remove caracteres perigosos do input"""
+    if not texto:
+        return ""
+    # Remover tags HTML
+    texto = re.sub(r'<[^>]+>', '', texto)
+    # Limitar tamanho
+    return texto.strip()[:200]
 
 
 # =================================================================
@@ -310,16 +456,34 @@ def legacy_index():
 
 
 @app.route('/registrar', methods=['GET', 'POST'])
+@limiter.limit("3 per minute")  # Limitar criação de contas
 def registrar():
     """Página de registro público - qualquer pessoa pode criar conta"""
     if request.method == 'POST':
-        nome = request.form['nome']
-        username = request.form['username']
-        email = request.form['email']
-        senha = request.form['senha']
-        confirmar_senha = request.form['confirmar_senha']
+        # Sanitizar inputs
+        nome = sanitizar_input(request.form.get('nome', ''))
+        username = request.form.get('username', '').strip().lower()
+        email = request.form.get('email', '').strip().lower()
+        senha = request.form.get('senha', '')
+        confirmar_senha = request.form.get('confirmar_senha', '')
         
-        # Validações
+        # Validações de segurança
+        if not nome or len(nome) < 2:
+            flash('Nome inválido! Mínimo 2 caracteres.', 'error')
+            return redirect(url_for('registrar'))
+        
+        if not validar_username(username):
+            flash('Username inválido! Use apenas letras, números e underline (3-20 chars).', 'error')
+            return redirect(url_for('registrar'))
+        
+        if not validar_email(email):
+            flash('Email inválido!', 'error')
+            return redirect(url_for('registrar'))
+        
+        if not validar_senha(senha):
+            flash('Senha deve ter no mínimo 6 caracteres!', 'error')
+            return redirect(url_for('registrar'))
+        
         if senha != confirmar_senha:
             flash('As senhas não conferem!', 'error')
             return redirect(url_for('registrar'))
@@ -337,7 +501,7 @@ def registrar():
             nome=nome,
             username=username,
             email=email,
-            senha_hash=hashlib.sha256(senha.encode()).hexdigest(),
+            senha_hash=bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
             cor='#4CAF50',
             emoji='👤'
         )
@@ -351,6 +515,7 @@ def registrar():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Anti-brute force
 def login():
     """Página de login"""
     if request.method == 'POST':
