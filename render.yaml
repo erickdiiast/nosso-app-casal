@@ -3,7 +3,9 @@ services:
     name: nosso-app
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      mkdir -p data uploads_comercial
     startCommand: gunicorn app_comercial:app
     envVars:
       - key: PYTHON_VERSION
@@ -12,7 +14,9 @@ services:
         generateValue: true
       - key: FLASK_ENV
         value: production
+      - key: DATABASE_PATH
+        value: data/casal_comercial.db
     disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads_comercial
+      name: data
+      mountPath: /opt/render/project/src/data
       sizeGB: 1

@@ -95,7 +95,10 @@ Talisman(app,
         'camera': "'self'",
     }
 )
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///casal_comercial.db'
+# Database configuration - use persistent storage on Render
+# Render persists /opt/render/project/src/data/ directory
+db_path = os.environ.get('DATABASE_PATH', 'casal_comercial.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads_comercial'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
