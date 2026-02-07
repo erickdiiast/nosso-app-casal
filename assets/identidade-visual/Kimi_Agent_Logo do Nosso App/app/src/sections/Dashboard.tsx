@@ -22,6 +22,16 @@ import { COLOR_OPTIONS } from '@/types';
 
 type TabType = 'home' | 'tasks' | 'rewards' | 'shop' | 'history' | 'profile';
 
+// Ícones personalizados
+const icons = {
+  home: '/icons/home.svg',
+  tasks: '/icons/tarefas.svg',
+  rewards: '/icons/recompensas.svg',
+  shop: '/icons/loja.svg',
+  history: '/icons/historico.svg',
+  profile: '/icons/perfil.svg',
+};
+
 interface Tab {
   id: TabType;
   icon: typeof Home;
@@ -37,12 +47,12 @@ export function Dashboard() {
   const pendingRewards = getPendingRewards();
 
   const tabs: Tab[] = [
-    { id: 'home', icon: Home, label: 'Início' },
-    { id: 'tasks', icon: CheckSquare, label: 'Tarefas', badge: pendingTasks.length },
-    { id: 'rewards', icon: Gift, label: 'Recompensas', badge: pendingRewards.length },
-    { id: 'shop', icon: ShoppingBag, label: 'Loja' },
-    { id: 'history', icon: History, label: 'Histórico' },
-    { id: 'profile', icon: User, label: 'Perfil' },
+    { id: 'home', icon: () => <img src={icons.home} alt="Home" className="w-5 h-5" />, label: 'Início' },
+    { id: 'tasks', icon: () => <img src={icons.tasks} alt="Tarefas" className="w-5 h-5" />, label: 'Tarefas', badge: pendingTasks.length },
+    { id: 'rewards', icon: () => <img src={icons.rewards} alt="Recompensas" className="w-5 h-5" />, label: 'Recompensas', badge: pendingRewards.length },
+    { id: 'shop', icon: () => <img src={icons.shop} alt="Loja" className="w-5 h-5" />, label: 'Loja' },
+    { id: 'history', icon: () => <img src={icons.history} alt="Histórico" className="w-5 h-5" />, label: 'Histórico' },
+    { id: 'profile', icon: () => <img src={icons.profile} alt="Perfil" className="w-5 h-5" />, label: 'Perfil' },
   ];
 
   const renderContent = () => {
@@ -71,9 +81,9 @@ export function Dashboard() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <motion.img
-              src="/icon.png"
+              src="/logo.png"
               alt="Nosso App"
-              className="w-10 h-10"
+              className="w-10 h-10 rounded-full"
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
