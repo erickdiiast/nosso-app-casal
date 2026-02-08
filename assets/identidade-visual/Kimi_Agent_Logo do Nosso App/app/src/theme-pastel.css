@@ -1,0 +1,169 @@
+/*
+ * Nosso App Casal - Theme Pastel
+ * Identidade visual com paleta de cores pastel romântica
+ */
+
+:root {
+  /* Cores principais pastel */
+  --color-primary: #c3f3ff;
+  --color-secondary: #c5ffce;
+  --color-highlight: #f9ffbe;
+  --color-accent: #ffd5ef;
+  --color-purple: #e8c4ff;
+  --color-text-dark: #333333;
+  --color-text-light: #ffffff;
+  
+  /* Gradientes */
+  --gradient-primary: linear-gradient(135deg, #ffd5ef 0%, #c3f3ff 100%);
+  --gradient-secondary: linear-gradient(135deg, #e8c4ff 0%, #f9ffbe 100%);
+  --gradient-love: linear-gradient(135deg, #ffd5ef 0%, #e8c4ff 50%, #c3f3ff 100%);
+  --gradient-gold: linear-gradient(135deg, #f9ffbe 0%, #ffe4a1 100%);
+  
+  /* Sombras suaves */
+  --shadow-soft: 0 4px 20px rgba(255, 213, 239, 0.3);
+  --shadow-card: 0 8px 32px rgba(200, 200, 255, 0.2);
+}
+
+/* Aplicar fundo pastel em todo o app */
+.bg-pastel {
+  background: linear-gradient(135deg, #fff5f8 0%, #f0f9ff 50%, #f5fff5 100%);
+  min-height: 100vh;
+}
+
+/* Cards com bordas arredondadas e sombra suave */
+.card-pastel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Botões primários - gradiente rosa/azul */
+.btn-pastel-primary {
+  background: var(--gradient-primary);
+  color: var(--color-text-dark);
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 213, 239, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-pastel-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 213, 239, 0.5);
+}
+
+/* Botões secundários - gradiente roxo/amarelo */
+.btn-pastel-secondary {
+  background: var(--gradient-secondary);
+  color: var(--color-text-dark);
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(232, 196, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-pastel-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(232, 196, 255, 0.4);
+}
+
+/* Botões outline pastel */
+.btn-pastel-outline {
+  background: transparent;
+  color: var(--color-text-dark);
+  padding: 0.875rem 1.75rem;
+  border: 2px solid var(--color-accent);
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-pastel-outline:hover {
+  background: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+/* Badges de pontos */
+.badge-pastel {
+  background: var(--gradient-gold);
+  color: var(--color-text-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 8px rgba(249, 255, 190, 0.4);
+}
+
+/* Inputs estilizados */
+.input-pastel {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 213, 239, 0.3);
+  border-radius: 16px;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-pastel:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(255, 213, 239, 0.2);
+  outline: none;
+}
+
+/* Navegação inferior */
+.nav-pastel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 213, 239, 0.3);
+}
+
+/* Header com gradiente pastel */
+.header-pastel {
+  background: var(--gradient-love);
+  color: var(--color-text-dark);
+}
+
+/* Animações suaves */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Scrollbar personalizada pastel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 213, 239, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-purple));
+  border-radius: 4px;
+}

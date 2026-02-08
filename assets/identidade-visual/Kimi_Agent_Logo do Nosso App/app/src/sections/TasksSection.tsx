@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Plus, 
@@ -239,12 +239,21 @@ function TaskCard({
 // Create Task Modal
 function CreateTaskModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { currentUser, partner, createTask } = useApp();
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [points, setPoints] = useState(10);
   const [assignedTo, setAssignedTo] = useState(currentUser?.id || '');
   const [recurrence, setRecurrence] = useState<TaskRecurrence>('none');
   const [dueDate, setDueDate] = useState('');
+
+  // Atualizar assignedTo quando o modal abrir/fechar
+  useEffect(() => {
+    if (open) {
+      // Se tem parceiro, sugerir atribuir ao parceiro por padrão
+      setAssignedTo(partner?.id || currentUser?.id || '');
+    }
+  }, [open, partner?.id, currentUser?.id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

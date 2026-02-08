@@ -9,6 +9,7 @@ export interface User {
   color: 'green' | 'pink' | 'purple' | 'blue' | 'orange';
   points: number;
   coupleId?: string;
+  userCode: string;  // Código fixo único do usuário (6 caracteres)
   createdAt: Date;
 }
 
@@ -89,6 +90,8 @@ export interface AppState {
   currentUser: User | null;
   couple: Couple | null;
   partner: User | null;
+  users: User[];  // Lista de todos os usuários cadastrados
+  couples: Couple[];  // Lista de todos os casais
   tasks: Task[];
   rewards: Reward[];
   vouchers: Voucher[];

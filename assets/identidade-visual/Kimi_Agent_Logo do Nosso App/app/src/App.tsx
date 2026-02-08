@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { AppProvider, useApp } from '@/hooks/useApp';
 import { AuthScreen } from '@/sections/AuthScreen';
-import { CoupleLink } from '@/sections/CoupleLink';
 import { Dashboard } from '@/sections/Dashboard';
 import { Toaster } from '@/components/ui/sonner';
 import './App.css';
@@ -47,35 +46,37 @@ function LoadingScreen() {
 
 // Main app content component
 function AppContent() {
-  const { currentUser, couple, isLoading, refreshState } = useApp();
+  const { currentUser, isLoading } = useApp();
+  const [appState, setAppState] = useState<'loading' | 'auth' | 'dashboard'>('loading');
 
-  // Refresh state periodically to check for partner updates
+  // Determine which screen to show based on state
   useEffect(() => {
-    if (currentUser && couple) {
-      const interval = setInterval(() => {
-        refreshState();
-      }, 5000); // Check every 5 seconds
-
-      return () => clearInterval(interval);
+    if (isLoading) {
+      setAppState('loading');
+      return;
     }
-  }, [currentUser, couple, refreshState]);
 
-  if (isLoading) {
-    return <LoadingScreen />;
+    if (!currentUser) {
+      setAppState('auth');
+      return;
+    }
+
+    // Usuário logado - vai direto pro dashboard
+    // O vínculo de casal é feito no Perfil via código de usuário
+    setAppState('dashboard');
+  }, [isLoading, currentUser]);
+
+  // Render appropriate screen
+  switch (appState) {
+    case 'loading':
+      return <LoadingScreen />;
+    case 'auth':
+      return <AuthScreen />;
+    case 'dashboard':
+      return <Dashboard />;
+    default:
+      return <LoadingScreen />;
   }
-
-  // Not logged in - show auth screen
-  if (!currentUser) {
-    return <AuthScreen />;
-  }
-
-  // Logged in but not linked to a couple
-  if (!couple) {
-    return <CoupleLink />;
-  }
-
-  // Fully logged in and linked - show dashboard
-  return <Dashboard />;
 }
 
 // Main App component

@@ -11,7 +11,11 @@ import {
   Sparkles,
   Trophy,
   Gift,
-  CheckSquare
+  CheckSquare,
+  Copy,
+  Link2,
+  Users,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +31,7 @@ export function ProfileSection() {
     couple, 
     logout, 
     unlinkCouple,
+    linkByUserCode,
     tasks,
     vouchers,
     rewards 
@@ -34,6 +39,28 @@ export function ProfileSection() {
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [showUnlinkModal, setShowUnlinkModal] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [joinSuccess, setJoinSuccess] = useState(false);
+
+  const handleJoinCouple = () => {
+    if (!joinCode.trim() || joinCode.length !== 6) {
+      setJoinError('Digite um código válido de 6 caracteres');
+      return;
+    }
+    
+    const success = linkByUserCode(joinCode.trim().toUpperCase());
+    if (success) {
+      setJoinSuccess(true);
+      setJoinError('');
+      setTimeout(() => {
+        setJoinSuccess(false);
+        setJoinCode('');
+      }, 3000);
+    } else {
+      setJoinError('Código de usuário não encontrado ou já vinculado');
+    }
+  };
 
   const completedTasks = tasks.filter(t => t.assignedTo === currentUser?.id && t.completed).length;
   const activeVouchers = vouchers.filter(v => v.redeemedBy === currentUser?.id && v.status === 'active').length;
@@ -85,6 +112,28 @@ export function ProfileSection() {
             {currentUser?.email}
           </p>
 
+          {/* Código fixo do usuário - só mostra se NÃO tiver casal */}
+          {!couple && (
+            <div className="mt-3 p-3 bg-gradient-to-r from-pink-100 to-purple-100 rounded-xl inline-flex items-center gap-2">
+              <span className="text-xs text-gray-600">Seu código:</span>
+              <code className="text-lg font-bold text-pink-600 tracking-wider">
+                {currentUser?.userCode}
+              </code>
+              <Button
+                onClick={() => {
+                  if (currentUser?.userCode) {
+                    navigator.clipboard.writeText(currentUser.userCode);
+                  }
+                }}
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 rounded-full hover:bg-pink-200"
+              >
+                <Copy className="w-3 h-3 text-pink-600" />
+              </Button>
+            </div>
+          )}
+
           <div className="flex items-center justify-center gap-2 mt-3">
             <div 
               className="w-4 h-4 rounded-full"
@@ -123,8 +172,96 @@ export function ProfileSection() {
         ))}
       </div>
 
-      {/* Couple info */}
-      {partner && (
+      {/* Seção de Conexão - só mostra se NÃO tiver casal */}
+      {!couple && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card-love p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Users className="w-6 h-6 text-purple-500" />
+            <h3 className="text-lg font-bold text-gray-800">Conectar com parceiro</h3>
+          </div>
+
+          {/* Seu código */}
+          <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
+            <p className="text-xs text-gray-500 mb-1">Seu código para compartilhar:</p>
+            <div className="flex items-center justify-center gap-2">
+              <code className="text-xl font-bold text-pink-600 tracking-wider">
+                {currentUser?.userCode}
+              </code>
+              <Button
+                onClick={() => {
+                  if (currentUser?.userCode) {
+                    navigator.clipboard.writeText(currentUser.userCode);
+                  }
+                }}
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 rounded-full hover:bg-pink-200"
+              >
+                <Copy className="w-3 h-3 text-pink-600" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Input do código do parceiro */}
+          <div className="space-y-3">
+            <p className="text-gray-500 text-sm text-center">
+              Digite o código do seu parceiro(a):
+            </p>
+            
+            <div className="relative">
+              <Input
+                type="text"
+                value={joinCode}
+                onChange={(e) => {
+                  setJoinCode(e.target.value.toUpperCase());
+                  setJoinError('');
+                }}
+                className="input-love text-center text-xl font-bold tracking-widest uppercase pr-12"
+                placeholder="XXXXXX"
+                maxLength={6}
+              />
+              <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+
+            {joinError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-red-500 text-sm text-center"
+              >
+                {joinError}
+              </motion.p>
+            )}
+
+            {joinSuccess && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-green-500 text-sm text-center font-medium"
+              >
+                ✅ Conectado com sucesso!
+              </motion.p>
+            )}
+
+            <Button
+              onClick={handleJoinCouple}
+              disabled={joinCode.length !== 6 || joinSuccess}
+              className="w-full btn-love gradient-love text-white py-5"
+            >
+              <Link2 className="w-5 h-5 mr-2" />
+              Conectar-se
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Couple info - sempre mostra se tiver casal */}
+      {couple && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -136,31 +273,50 @@ export function ProfileSection() {
             <h3 className="text-lg font-bold text-gray-800">Seu casal</h3>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex -space-x-3">
+          {/* Avatares dos parceiros */}
+          {partner ? (
+            <div className="flex items-center gap-4">
+              <div className="flex -space-x-3">
+                <div 
+                  className="w-14 h-14 rounded-full border-3 border-white flex items-center justify-center text-white font-bold"
+                  style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === currentUser?.color)?.hex }}
+                >
+                  {currentUser?.name.charAt(0).toUpperCase()}
+                </div>
+                <div 
+                  className="w-14 h-14 rounded-full border-3 border-white flex items-center justify-center text-white font-bold"
+                  style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === partner?.color)?.hex }}
+                >
+                  {partner.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
+              <div>
+                <p className="font-bold text-gray-800">
+                  {currentUser?.name} & {partner.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Juntos desde {new Date(couple?.createdAt || '').toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
               <div 
                 className="w-14 h-14 rounded-full border-3 border-white flex items-center justify-center text-white font-bold"
                 style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === currentUser?.color)?.hex }}
               >
                 {currentUser?.name.charAt(0).toUpperCase()}
               </div>
-              <div 
-                className="w-14 h-14 rounded-full border-3 border-white flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === partner?.color)?.hex }}
-              >
-                {partner.name.charAt(0).toUpperCase()}
+              <div>
+                <p className="font-bold text-gray-800">{currentUser?.name}</p>
+                <p className="text-sm text-yellow-600">
+                  Aguardando parceiro(a)...
+                </p>
               </div>
             </div>
-            <div>
-              <p className="font-bold text-gray-800">
-                {currentUser?.name} & {partner.name}
-              </p>
-              <p className="text-sm text-gray-500">
-                Juntos desde {new Date(couple?.createdAt || '').toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-          </div>
+          )}
 
+          {/* Pontos do casal */}
           <div className="mt-4 p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-600" />
@@ -169,6 +325,67 @@ export function ProfileSection() {
             <span className="text-xl font-bold text-yellow-600">{couple?.totalPoints || 0}</span>
           </div>
 
+          {/* Inserir código do parceiro - aparece quando está aguardando */}
+          {!partner && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-4 h-4 text-purple-600" />
+                <span className="text-sm text-purple-700 font-medium">Seu parceiro tem um código?</span>
+              </div>
+              
+              <p className="text-xs text-purple-600 mb-3">
+                Se seu parceiro já criou um casal, insira o código dele abaixo para conectar:
+              </p>
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => {
+                      setJoinCode(e.target.value.toUpperCase());
+                      setJoinError('');
+                    }}
+                    className="input-love text-center text-lg font-bold tracking-widest uppercase"
+                    placeholder="CÓDIGO DO PARCEIRO"
+                    maxLength={6}
+                  />
+                </div>
+
+                {joinError && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-red-500 text-xs text-center"
+                  >
+                    {joinError}
+                  </motion.p>
+                )}
+
+                {joinSuccess && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-green-600 text-xs text-center font-medium"
+                  >
+                    ✅ Casais conectados com sucesso!
+                  </motion.p>
+                )}
+
+                <Button
+                  onClick={handleJoinCouple}
+                  disabled={joinCode.length !== 6 || joinSuccess}
+                  variant="outline"
+                  className="w-full border-purple-300 text-purple-700 hover:bg-purple-100 rounded-full"
+                >
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Conectar ao casal do parceiro
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Botão desvincular */}
           <Button
             onClick={() => setShowUnlinkModal(true)}
             variant="outline"

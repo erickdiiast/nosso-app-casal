@@ -1,0 +1,101 @@
+/*
+ * Nosso App Casal - Theme
+ *
+ * This stylesheet defines the colour palette and UI component styles
+ * for the "Nosso App Casal" couples gamification app.  It uses a
+ * romantic pastel palette inspired by a "pastel hearts" colour scheme【591596480145178†L42-L47】.  Colours are
+ * declared as CSS custom properties to make it easy to reference them
+ * throughout the application.  Images such as the header and footer
+ * backgrounds are also referenced here and should be placed in an
+ * adjacent `assets/` folder.
+ */
+
+/* Colour palette */
+:root {
+  /* Pastel blue from the palette (#c3f3ff) */
+  --color-primary: #c3f3ff;
+  /* Pastel green (#c5ffce) */
+  --color-secondary: #c5ffce;
+  /* Pastel yellow (#f9ffbe) */
+  --color-highlight: #f9ffbe;
+  /* Pastel pink (#ffd5ef) */
+  --color-accent: #ffd5ef;
+  /* Pastel purple (#e8c4ff) */
+  --color-purple: #e8c4ff;
+  /* Dark text colour for contrast */
+  --color-text-dark: #333333;
+  /* Light text colour for contrast on dark backgrounds */
+  --color-text-light: #ffffff;
+}
+
+/* Global typography */
+body {
+  font-family: 'Poppins', 'Nunito Sans', sans-serif;
+  color: var(--color-text-dark);
+  margin: 0;
+  padding: 0;
+}
+
+/* Header styles */
+.app-header {
+  /* Use the provided header background image */
+  background-image: url('./header.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--color-text-light);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* Footer styles */
+.app-footer {
+  background-image: url('./footer.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--color-text-dark);
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Primary button */
+.btn-primary {
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+  color: var(--color-text-light);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease-in-out;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+/* Secondary button */
+.btn-secondary {
+  background: linear-gradient(90deg, var(--color-purple), var(--color-highlight));
+  color: var(--color-text-dark);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s ease-in-out;
+}
+.btn-secondary:hover {
+  transform: translateY(-2px);
+}
+
+/* Utility classes for cards or panels */
+.card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}

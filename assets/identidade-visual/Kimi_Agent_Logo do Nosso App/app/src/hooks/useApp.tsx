@@ -11,6 +11,10 @@ import type {
   AppState
 } from '@/types';
 
+// APP VERSION - Change this to clear all localStorage data on next load
+const APP_VERSION = '2.5.4';
+const VERSION_KEY = 'nosso-app-version';
+
 interface AppContextType extends AppState {
   // Auth
   login: (email: string, password: string) => boolean;
@@ -22,6 +26,7 @@ interface AppContextType extends AppState {
   joinCouple: (inviteCode: string) => boolean;
   createCouple: () => string;
   unlinkCouple: () => void;
+  linkByUserCode: (partnerCode: string) => boolean;
   
   // Tasks
   createTask: (task: Omit<Task, 'id' | 'createdAt' | 'completed'>) => void;
@@ -62,6 +67,17 @@ const generateCode = () => {
   return code;
 };
 
+// Generate a unique user code
+const generateUserCode = (existingUsers: User[]) => {
+  let code = '';
+  let attempts = 0;
+  do {
+    code = generateCode();
+    attempts++;
+  } while (existingUsers.some(u => u.userCode === code) && attempts < 100);
+  return code;
+};
+
 // Storage keys
 const STORAGE_KEY = 'nosso-app-data';
 
@@ -70,12 +86,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     currentUser: null,
     couple: null,
     partner: null,
+    users: [],
+    couples: [],
     tasks: [],
     rewards: [],
     vouchers: [],
     activities: [],
     isLoading: true,
   });
+
+  // Check version - apenas log, NÃO limpa mais os dados
+  useEffect(() => {
+    const storedVersion = localStorage.getItem(VERSION_KEY);
+    if (storedVersion !== APP_VERSION) {
+      // Apenas atualiza a versão, mantém os dados do usuário
+      localStorage.setItem(VERSION_KEY, APP_VERSION);
+      console.log(`[Nosso App] Updated to version ${APP_VERSION}`);
+    }
+  }, []);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -89,6 +117,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...parsed.currentUser,
           createdAt: new Date(parsed.currentUser.createdAt),
         } : null,
+        users: parsed.users?.map((u: User) => ({
+          ...u,
+          createdAt: new Date(u.createdAt),
+        })) || [],
+        couples: parsed.couples?.map((c: Couple) => ({
+          ...c,
+          createdAt: new Date(c.createdAt),
+        })) || [],
         couple: parsed.couple ? {
           ...parsed.couple,
           createdAt: new Date(parsed.couple.createdAt),
@@ -129,44 +165,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Auth functions
   const login = useCallback((email: string, password: string) => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return false;
+    console.log('[LOGIN] Tentando login:', email);
     
-    const parsed = JSON.parse(stored);
-    const users: User[] = parsed.users || [];
-    const user = users.find((u: User) => u.email === email && u.password === password);
+    const user = state.users.find((u: User) => u.email === email && u.password === password);
     
     if (user) {
-      const couple = parsed.couples?.find((c: Couple) => 
-        c.id === user.coupleId
-      );
-      const partner = couple ? parsed.users?.find((u: User) => 
-        u.id !== user.id && (u.id === couple.partner1Id || u.id === couple.partner2Id)
-      ) : null;
+      console.log('[LOGIN] Usuário encontrado:', user.name, 'coupleId:', user.coupleId);
+      
+      // Buscar casal do usuário
+      const couple = user.coupleId 
+        ? state.couples.find((c: Couple) => c.id === user.coupleId) || null
+        : null;
+      
+      console.log('[LOGIN] Casal encontrado:', couple ? 'Sim' : 'Não');
+      
+      // Buscar parceiro - garantir que busca do estado global de users
+      let partner = null;
+      if (couple) {
+        const partnerId = couple.partner1Id === user.id ? couple.partner2Id : couple.partner1Id;
+        partner = state.users.find((u: User) => u.id === partnerId) || null;
+        console.log('[LOGIN] Buscando parceiro ID:', partnerId);
+      }
+      
+      console.log('[LOGIN] Parceiro encontrado:', partner ? partner.name : 'Não');
+      
+      // Atualizar user com dados mais recentes do users array
+      const updatedUser = state.users.find(u => u.id === user.id) || user;
       
       setState(prev => ({
         ...prev,
-        currentUser: user,
+        currentUser: updatedUser,
         couple: couple || null,
         partner: partner || null,
-        tasks: parsed.tasks?.filter((t: Task) => t.coupleId === user.coupleId) || [],
-        rewards: parsed.rewards?.filter((r: Reward) => r.coupleId === user.coupleId) || [],
-        vouchers: parsed.vouchers?.filter((v: Voucher) => v.coupleId === user.coupleId) || [],
-        activities: parsed.activities?.filter((a: Activity) => a.coupleId === user.coupleId) || [],
       }));
       return true;
     }
+    
+    console.log('[LOGIN] Usuário não encontrado');
     return false;
-  }, []);
+  }, [state.users, state.couples]);
 
   const register = useCallback((name: string, email: string, password: string, color: User['color']) => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const parsed = stored ? JSON.parse(stored) : {};
-    const users: User[] = parsed.users || [];
+    console.log('[REGISTER] Iniciando registro:', email);
     
-    if (users.some((u: User) => u.email === email)) {
+    // Verificar se email já existe
+    if (state.users.some((u: User) => u.email === email)) {
+      console.log('[REGISTER] Email já existe');
       return false;
     }
+    
+    // Gerar código único do usuário
+    const userCode = generateUserCode(state.users);
+    console.log('[REGISTER] Código gerado:', userCode);
     
     const newUser: User = {
       id: uuidv4(),
@@ -175,30 +225,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       password,
       color,
       points: 0,
+      userCode,
       createdAt: new Date(),
     };
     
-    parsed.users = [...users, newUser];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    console.log('[REGISTER] Novo usuário:', { id: newUser.id, userCode: newUser.userCode });
     
+    // Atualizar estado - o useEffect vai salvar no localStorage
     setState(prev => ({
       ...prev,
       currentUser: newUser,
+      users: [...prev.users, newUser],
     }));
+    
+    console.log('[REGISTER] Estado atualizado, total usuários:', state.users.length + 1);
     return true;
-  }, []);
+  }, [state.users]);
 
   const logout = useCallback(() => {
-    setState({
+    // Logout apenas desloga o usuário, mantém dados do casal no estado
+    setState(prev => ({
+      ...prev,
       currentUser: null,
-      couple: null,
-      partner: null,
-      tasks: [],
-      rewards: [],
-      vouchers: [],
-      activities: [],
+      // NÃO limpar couple, partner, tasks, etc - dados persistem no localStorage
       isLoading: false,
-    });
+    }));
   }, []);
 
   // Couple functions
@@ -286,45 +337,133 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [state.currentUser]);
 
   const unlinkCouple = useCallback(() => {
-    if (!state.currentUser || !state.couple) return;
+    console.log('[UNLINK] Desvinculando casal:', state.couple?.id);
     
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
+    if (!state.currentUser || !state.couple) {
+      console.log('[UNLINK] Sem usuário ou casal para desvincular');
+      return;
+    }
     
-    const parsed = JSON.parse(stored);
+    const coupleId = state.couple.id;
     
-    // Remove couple
-    parsed.couples = (parsed.couples || []).filter((c: Couple) => c.id !== state.couple!.id);
-    
-    // Remove coupleId from users
-    const users: User[] = parsed.users || [];
-    users.forEach((u: User) => {
-      if (u.coupleId === state.couple!.id) {
-        delete u.coupleId;
-      }
+    // Atualizar estado - remover casal e atualizar usuários
+    setState(prev => {
+      // Remover casal da lista
+      const updatedCouples = prev.couples.filter((c: Couple) => c.id !== coupleId);
+      
+      // Remover coupleId de TODOS os usuários que tinham este casal
+      const updatedUsers = prev.users.map((u: User) => {
+        if (u.coupleId === coupleId) {
+          const { coupleId: _, ...userWithoutCouple } = u;
+          return userWithoutCouple as User;
+        }
+        return u;
+      });
+      
+      console.log('[UNLINK] Casais antes:', prev.couples.length, 'depois:', updatedCouples.length);
+      console.log('[UNLINK] Usuários atualizados:', updatedUsers.map(u => ({ name: u.name, coupleId: u.coupleId })));
+      
+      return {
+        ...prev,
+        couples: updatedCouples,
+        users: updatedUsers,
+        couple: null,
+        partner: null,
+        currentUser: prev.currentUser ? { 
+          ...prev.currentUser, 
+          coupleId: undefined 
+        } : null,
+        tasks: [],
+        rewards: [],
+        vouchers: [],
+        activities: [],
+      };
     });
-    parsed.users = users;
     
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    
-    setState(prev => ({
-      ...prev,
-      couple: null,
-      partner: null,
-      currentUser: prev.currentUser ? { ...prev.currentUser, coupleId: undefined } : null,
-      tasks: [],
-      rewards: [],
-      vouchers: [],
-    }));
+    console.log('[UNLINK] Casal desvinculado com sucesso');
   }, [state.currentUser, state.couple]);
 
   const generateInviteCode = useCallback(() => {
     return state.couple?.inviteCode || createCouple();
   }, [state.couple, createCouple]);
 
+  // Link with partner by user code
+  const linkByUserCode = useCallback((partnerCode: string) => {
+    console.log('[LINK] Tentando vincular com código:', partnerCode);
+    console.log('[LINK] Usuário atual:', state.currentUser?.name, 'coupleId:', state.currentUser?.coupleId);
+    
+    if (!state.currentUser) {
+      console.log('[LINK] Sem usuário logado');
+      return false;
+    }
+    
+    // Verificar se usuário atual já tem casal
+    if (state.currentUser.coupleId) {
+      console.log('[LINK] Usuário já está em um casal');
+      return false;
+    }
+    
+    // Não pode vincular a si mesmo
+    if (partnerCode === state.currentUser.userCode) {
+      console.log('[LINK] Não pode vincular a si mesmo');
+      return false;
+    }
+    
+    // Buscar parceiro pelo código
+    const partner = state.users.find((u: User) => u.userCode === partnerCode);
+    if (!partner) {
+      console.log('[LINK] Parceiro não encontrado com código:', partnerCode);
+      return false;
+    }
+    
+    console.log('[LINK] Parceiro encontrado:', partner.name, 'coupleId:', partner.coupleId);
+    
+    // Se o parceiro já tem casal, não pode vincular
+    if (partner.coupleId) {
+      console.log('[LINK] Parceiro já está em um casal');
+      return false;
+    }
+    
+    // Criar novo casal
+    const newCouple: Couple = {
+      id: uuidv4(),
+      inviteCode: generateCode(),
+      partner1Id: state.currentUser.id,
+      partner2Id: partner.id,
+      createdAt: new Date(),
+      totalPoints: 0,
+    };
+    
+    console.log('[LINK] Criando novo casal:', newCouple.id);
+    
+    // Atualizar estado
+    setState(prev => ({
+      ...prev,
+      couple: newCouple,
+      partner: partner,
+      couples: [...prev.couples, newCouple],
+      users: prev.users.map(u => {
+        if (u.id === state.currentUser!.id || u.id === partner.id) {
+          return { ...u, coupleId: newCouple.id };
+        }
+        return u;
+      }),
+    }));
+    
+    console.log('[LINK] Casal criado com sucesso!');
+    return true;
+  }, [state.currentUser, state.users, state.couples]);
+
   // Task functions
   const createTask = useCallback((task: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
-    if (!state.currentUser || !state.couple) return;
+    console.log('[CREATE TASK] Criando tarefa:', task.title);
+    console.log('[CREATE TASK] Atribuída a:', task.assignedTo);
+    console.log('[CREATE TASK] Criada por:', task.createdBy);
+    
+    if (!state.currentUser) {
+      console.log('[CREATE TASK] Erro: sem usuário logado');
+      return;
+    }
     
     const newTask: Task = {
       ...task,
@@ -333,52 +472,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       completed: false,
     };
     
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const parsed = stored ? JSON.parse(stored) : {};
-    parsed.tasks = [...(parsed.tasks || []), newTask];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    
-    setState(prev => ({
-      ...prev,
-      tasks: [...prev.tasks, newTask],
-    }));
-  }, [state.currentUser, state.couple]);
+    // Atualizar estado - o useEffect vai salvar no localStorage
+    setState(prev => {
+      const updatedTasks = [...prev.tasks, newTask];
+      console.log('[CREATE TASK] Total de tarefas:', updatedTasks.length);
+      return {
+        ...prev,
+        tasks: updatedTasks,
+      };
+    });
+  }, [state.currentUser]);
 
   const completeTask = useCallback((taskId: string, proofPhoto?: string) => {
     if (!state.currentUser || !state.couple) return;
     
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task) return;
     
-    const parsed = JSON.parse(stored);
-    const tasks: Task[] = parsed.tasks || [];
-    const taskIndex = tasks.findIndex((t: Task) => t.id === taskId);
-    
-    if (taskIndex < 0) return;
-    
-    const task = tasks[taskIndex];
-    task.completed = true;
-    task.completedAt = new Date();
-    task.proofPhoto = proofPhoto;
-    
-    // Update user points
-    const users: User[] = parsed.users || [];
-    const userIndex = users.findIndex((u: User) => u.id === task.assignedTo);
-    if (userIndex >= 0) {
-      users[userIndex].points = (users[userIndex].points || 0) + task.points;
-      parsed.users = users;
+    // Validar se quem completa é quem foi atribuído
+    if (task.assignedTo !== state.currentUser.id) {
+      console.log('[COMPLETE] Apenas o usuário atribuído pode completar');
+      return;
     }
     
-    // Update couple total points
-    const couples: Couple[] = parsed.couples || [];
-    const coupleIndex = couples.findIndex((c: Couple) => c.id === state.couple!.id);
-    if (coupleIndex >= 0) {
-      couples[coupleIndex].totalPoints = (couples[coupleIndex].totalPoints || 0) + task.points;
-      parsed.couples = couples;
-    }
-    
-    parsed.tasks = tasks;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    const completedTask: Task = {
+      ...task,
+      completed: true,
+      completedAt: new Date(),
+      proofPhoto,
+    };
     
     // Add activity
     const newActivity: Activity = {
@@ -392,71 +514,82 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(),
     };
     
-    // Create recurring task if needed
-    if (task.recurrence !== 'none') {
-      let nextDueDate: Date;
-      const now = new Date();
+    setState(prev => {
+      // Atualizar tarefa completada
+      let updatedTasks = prev.tasks.map(t => 
+        t.id === taskId ? completedTask : t
+      );
       
-      switch (task.recurrence) {
-        case 'daily':
-          nextDueDate = addDays(now, 1);
-          break;
-        case 'weekly':
-          nextDueDate = addWeeks(now, 1);
-          break;
-        case 'biweekly':
-          nextDueDate = addWeeks(now, 2);
-          break;
-        case 'monthly':
-          nextDueDate = addMonths(now, 1);
-          break;
-        default:
-          nextDueDate = now;
+      // Atualizar pontos do usuário que completou
+      const updatedUsers = prev.users.map(u => {
+        if (u.id === task.assignedTo) {
+          return { ...u, points: (u.points || 0) + task.points };
+        }
+        return u;
+      });
+      
+      // Atualizar pontos do casal
+      const updatedCouples = prev.couples.map(c => {
+        if (c.id === state.couple!.id) {
+          return { ...c, totalPoints: (c.totalPoints || 0) + task.points };
+        }
+        return c;
+      });
+      
+      // Criar tarefa recorrente se necessário
+      if (task.recurrence !== 'none') {
+        let nextDueDate: Date;
+        const now = new Date();
+        
+        switch (task.recurrence) {
+          case 'daily':
+            nextDueDate = addDays(now, 1);
+            break;
+          case 'weekly':
+            nextDueDate = addWeeks(now, 1);
+            break;
+          case 'biweekly':
+            nextDueDate = addWeeks(now, 2);
+            break;
+          case 'monthly':
+            nextDueDate = addMonths(now, 1);
+            break;
+          default:
+            nextDueDate = now;
+        }
+        
+        const recurringTask: Task = {
+          ...task,
+          id: uuidv4(),
+          createdAt: new Date(),
+          completed: false,
+          completedAt: undefined,
+          proofPhoto: undefined,
+          dueDate: nextDueDate,
+          isRecurringInstance: true,
+          parentTaskId: task.parentTaskId || task.id,
+        };
+        
+        updatedTasks = [...updatedTasks, recurringTask];
       }
       
-      const recurringTask: Task = {
-        ...task,
-        id: uuidv4(),
-        createdAt: new Date(),
-        completed: false,
-        completedAt: undefined,
-        proofPhoto: undefined,
-        dueDate: nextDueDate,
-        isRecurringInstance: true,
-        parentTaskId: task.parentTaskId || task.id,
+      // Atualizar currentUser se ele for quem recebeu os pontos
+      const updatedCurrentUser = prev.currentUser?.id === task.assignedTo
+        ? { ...prev.currentUser, points: (prev.currentUser.points || 0) + task.points }
+        : prev.currentUser;
+      
+      return {
+        ...prev,
+        tasks: updatedTasks,
+        users: updatedUsers,
+        couples: updatedCouples,
+        currentUser: updatedCurrentUser,
+        activities: [newActivity, ...prev.activities],
       };
-      
-      parsed.tasks = [...parsed.tasks, recurringTask];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === taskId ? task : t).concat(recurringTask),
-        currentUser: prev.currentUser?.id === task.assignedTo 
-          ? { ...prev.currentUser, points: (prev.currentUser.points || 0) + task.points }
-          : prev.currentUser,
-        activities: [newActivity, ...prev.activities],
-      }));
-    } else {
-      setState(prev => ({
-        ...prev,
-        tasks: prev.tasks.map(t => t.id === taskId ? task : t),
-        currentUser: prev.currentUser?.id === task.assignedTo 
-          ? { ...prev.currentUser, points: (prev.currentUser.points || 0) + task.points }
-          : prev.currentUser,
-        activities: [newActivity, ...prev.activities],
-      }));
-    }
-  }, [state.currentUser, state.couple]);
+    });
+  }, [state.currentUser, state.couple, state.tasks, state.users, state.couples]);
 
   const deleteTask = useCallback((taskId: string) => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-    
-    const parsed = JSON.parse(stored);
-    parsed.tasks = (parsed.tasks || []).filter((t: Task) => t.id !== taskId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    
     setState(prev => ({
       ...prev,
       tasks: prev.tasks.filter(t => t.id !== taskId),
@@ -577,25 +710,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const redeemReward = useCallback((rewardId: string) => {
     if (!state.currentUser || !state.couple) return;
     
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-    
-    const parsed = JSON.parse(stored);
-    const rewards: Reward[] = parsed.rewards || [];
-    const reward = rewards.find((r: Reward) => r.id === rewardId);
-    
+    const reward = state.rewards.find(r => r.id === rewardId);
     if (!reward || reward.status !== 'approved') return;
     
-    const users: User[] = parsed.users || [];
-    const userIndex = users.findIndex((u: User) => u.id === state.currentUser!.id);
+    // Verificar se tem pontos suficientes
+    if ((state.currentUser.points || 0) < reward.points) {
+      console.log('[REDEEM] Pontos insuficientes');
+      return;
+    }
     
-    if (userIndex < 0 || (users[userIndex].points || 0) < reward.points) return;
-    
-    // Deduct points
-    users[userIndex].points = (users[userIndex].points || 0) - reward.points;
-    parsed.users = users;
-    
-    // Create voucher
     const newVoucher: Voucher = {
       id: uuidv4(),
       rewardId: reward.id,
@@ -608,10 +731,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(),
     };
     
-    parsed.vouchers = [...(parsed.vouchers || []), newVoucher];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    
-    // Add activity
     const newActivity: Activity = {
       id: uuidv4(),
       type: 'voucher_redeemed',
@@ -623,13 +742,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(),
     };
     
-    setState(prev => ({
-      ...prev,
-      currentUser: { ...prev.currentUser!, points: users[userIndex].points },
-      vouchers: [...prev.vouchers, newVoucher],
-      activities: [newActivity, ...prev.activities],
-    }));
-  }, [state.currentUser, state.couple]);
+    setState(prev => {
+      const newPoints = (prev.currentUser!.points || 0) - reward.points;
+      
+      return {
+        ...prev,
+        currentUser: { ...prev.currentUser!, points: newPoints },
+        users: prev.users.map(u => 
+          u.id === prev.currentUser!.id ? { ...u, points: newPoints } : u
+        ),
+        vouchers: [...prev.vouchers, newVoucher],
+        activities: [newActivity, ...prev.activities],
+      };
+    });
+  }, [state.currentUser, state.couple, state.rewards]);
 
   const useVoucher = useCallback((voucherId: string) => {
     if (!state.currentUser || !state.couple) return;
@@ -714,6 +840,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     joinCouple,
     createCouple,
     unlinkCouple,
+    linkByUserCode,
     createTask,
     completeTask,
     deleteTask,

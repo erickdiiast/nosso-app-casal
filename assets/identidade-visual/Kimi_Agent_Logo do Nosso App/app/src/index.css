@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+@import './theme-pastel.css';
 
 :root {
   /* Cores principais - tema romântico */
@@ -201,7 +202,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 9999px;
   border: 2px solid hsl(var(--border));
   transition: all 0.3s ease;
-  padding: 0.75rem 1.25rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .input-love:focus {

@@ -136,7 +136,7 @@ export function AuthScreen() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="input-love pl-10"
+                      className="input-love pl-10 pr-4"
                       placeholder="Seu nome"
                       required={!isLogin}
                     />
@@ -154,7 +154,7 @@ export function AuthScreen() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input-love pl-10"
+                  className="input-love pl-10 pr-12"
                   placeholder="seu@email.com"
                   required
                 />
@@ -170,7 +170,7 @@ export function AuthScreen() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-love pl-10"
+                  className="input-love pl-10 pr-12"
                   placeholder="••••••••"
                   required
                 />

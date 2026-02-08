@@ -1,4 +1,4 @@
-/* App-specific styles */
+/* App-specific styles with Pastel Theme */
 
 /* Smooth transitions between screens */
 .screen-transition-enter {
@@ -23,14 +23,14 @@
   transition: opacity 300ms, transform 300ms;
 }
 
-/* Card hover effects */
+/* Card hover effects - pastel */
 .card-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(233, 30, 99, 0.15);
+  box-shadow: 0 12px 40px rgba(255, 213, 239, 0.25);
 }
 
 /* Button press effect */
@@ -38,32 +38,32 @@
   transform: scale(0.96);
 }
 
-/* Gradient text */
+/* Gradient text - pastel */
 .gradient-text {
-  background: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+  background: linear-gradient(135deg, #e8c4ff 0%, #ffd5ef 50%, #c3f3ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glass morphism effect */
+/* Glass morphism effect - pastel */
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Custom shadow for cards */
+/* Custom shadow for cards - pastel */
 .shadow-love {
-  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.1);
+  box-shadow: 0 4px 20px rgba(255, 213, 239, 0.25);
 }
 
 .shadow-love-lg {
-  box-shadow: 0 8px 40px rgba(233, 30, 99, 0.15);
+  box-shadow: 0 8px 40px rgba(200, 200, 255, 0.2);
 }
 
-/* Animated background gradient */
+/* Animated background gradient - pastel */
 @keyframes gradient-shift {
   0% {
     background-position: 0% 50%;
@@ -77,12 +77,12 @@
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fecfef, #ff9a9e);
+  background: linear-gradient(-45deg, #ffd5ef, #c3f3ff, #e8c4ff, #c5ffce);
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }
 
-/* Pulse animation for notifications */
+/* Pulse animation for notifications - pastel */
 @keyframes pulse-ring {
   0% {
     transform: scale(0.8);
@@ -112,14 +112,12 @@
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
-  .mobile-full {
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
+  :root {
+    --radius: 1rem;
   }
   
-  .mobile-padding {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .card-pastel {
+    border-radius: 20px;
   }
 }
 
@@ -145,21 +143,21 @@
   }
 }
 
-/* Focus styles for accessibility */
+/* Focus styles for accessibility - pastel */
 .focus-ring:focus {
   outline: none;
   ring: 2px;
-  ring-color: #E91E63;
+  ring-color: #ffd5ef;
   ring-offset: 2px;
 }
 
-/* Selection color */
+/* Selection color - pastel */
 ::selection {
-  background: rgba(233, 30, 99, 0.3);
+  background: rgba(255, 213, 239, 0.4);
   color: inherit;
 }
 
-/* Custom scrollbar for webkit browsers */
+/* Custom scrollbar for webkit browsers - pastel */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -170,10 +168,81 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+  background: linear-gradient(135deg, #ffd5ef 0%, #e8c4ff 100%);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #FF80AB 0%, #E91E63 100%);
+  background: linear-gradient(135deg, #e8c4ff 0%, #c3f3ff 100%);
+}
+
+/* Confetti effect - pastel colors */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  animation: confetti 3s ease-out forwards;
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) rotate(720deg);
+  }
+}
+
+/* Avatar with colored border - pastel */
+.avatar-colored {
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #ffd5ef 0%, #c3f3ff 100%) border-box;
+}
+
+/* Status indicators - pastel */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background: #c5ffce;
+  box-shadow: 0 0 0 2px rgba(197, 255, 206, 0.3);
+}
+
+.status-dot.pending {
+  background: #f9ffbe;
+  box-shadow: 0 0 0 2px rgba(249, 255, 190, 0.3);
+}
+
+/* Utility classes - pastel theme */
+.text-gradient {
+  background: linear-gradient(135deg, #e8c4ff 0%, #ffd5ef 50%, #c3f3ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-pattern-hearts {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 35l-2-2c-6-6-10-10-10-16 0-4 3-7 7-7 2 0 4 1 5 3 1-2 3-3 5-3 4 0 7 3 7 7 0 6-4 10-10 16l-2 2z' fill='%23ffd5ef' fill-opacity='0.1'/%3E%3C/svg%3E");
+}
+
+/* Dark mode adjustments - pastel */
+.dark .card-pastel {
+  background: rgba(40, 30, 50, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }

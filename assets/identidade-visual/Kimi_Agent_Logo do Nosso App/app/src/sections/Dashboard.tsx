@@ -5,11 +5,11 @@ import {
   CheckSquare, 
   Gift, 
   ShoppingBag, 
-  History, 
-  User, 
   LogOut,
   Sparkles,
-  Trophy
+  Trophy,
+  Clock,
+  CircleUser
 } from 'lucide-react';
 import { useApp } from '@/hooks/useApp';
 import { TasksSection } from './TasksSection';
@@ -22,15 +22,7 @@ import { COLOR_OPTIONS } from '@/types';
 
 type TabType = 'home' | 'tasks' | 'rewards' | 'shop' | 'history' | 'profile';
 
-// Ícones personalizados
-const icons = {
-  home: '/icons/home.svg',
-  tasks: '/icons/tarefas.svg',
-  rewards: '/icons/recompensas.svg',
-  shop: '/icons/loja.svg',
-  history: '/icons/historico.svg',
-  profile: '/icons/perfil.svg',
-};
+
 
 interface Tab {
   id: TabType;
@@ -47,12 +39,12 @@ export function Dashboard() {
   const pendingRewards = getPendingRewards();
 
   const tabs: Tab[] = [
-    { id: 'home', icon: () => <img src={icons.home} alt="Home" className="w-5 h-5" />, label: 'Início' },
-    { id: 'tasks', icon: () => <img src={icons.tasks} alt="Tarefas" className="w-5 h-5" />, label: 'Tarefas', badge: pendingTasks.length },
-    { id: 'rewards', icon: () => <img src={icons.rewards} alt="Recompensas" className="w-5 h-5" />, label: 'Recompensas', badge: pendingRewards.length },
-    { id: 'shop', icon: () => <img src={icons.shop} alt="Loja" className="w-5 h-5" />, label: 'Loja' },
-    { id: 'history', icon: () => <img src={icons.history} alt="Histórico" className="w-5 h-5" />, label: 'Histórico' },
-    { id: 'profile', icon: () => <img src={icons.profile} alt="Perfil" className="w-5 h-5" />, label: 'Perfil' },
+    { id: 'home', icon: Home, label: 'Início' },
+    { id: 'tasks', icon: CheckSquare, label: 'Tarefas', badge: pendingTasks.length },
+    { id: 'rewards', icon: Gift, label: 'Recompensas', badge: pendingRewards.length },
+    { id: 'shop', icon: ShoppingBag, label: 'Loja' },
+    { id: 'history', icon: Clock, label: 'Histórico' },
+    { id: 'profile', icon: CircleUser, label: 'Perfil' },
   ];
 
   const renderContent = () => {
